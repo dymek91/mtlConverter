@@ -269,6 +269,12 @@ namespace mtlConverter
                 result = rgx.Replace(input, replacement);
 
                 input = result;
+                pattern = "DecalDiffuseOpacity=\"(.*?)\"";
+                replacement = "DecalDiffuseOpacity=\"0\"";
+                rgx = new Regex(pattern);
+                result = rgx.Replace(input, replacement);
+
+                input = result;
                 pattern = "Shader=\"Illum\"";
                 replacement = "Shader=\"IllumCIG\"";
                 rgx = new Regex(pattern);
@@ -370,7 +376,7 @@ namespace mtlConverter
                 IEnumerable<XAttribute> matAttributes = el.Attributes();
                 IEnumerable<XElement> matElements = el.Elements();
 
-                el.Attribute("SurfaceType").Value = "";
+                el.Attribute("SurfaceType").Value = "mat_metal";
                 if (el.Attribute("Shader").Value == "Illum")//IllumCIG
                 {
                     el.Attribute("Shader").Value = "IllumCIG";
