@@ -368,6 +368,11 @@ namespace mtlConverter
             }
             xmlDoc.Attribute("MtlFlags").Value = "524544";
             XElement subMaterials = new XElement("SubMaterials");
+            if(xml.Element("Material").Element("Textures")!=null)
+            {
+                xmlDoc.Add(xml.Element("Material").Element("Textures"));
+                xmlDoc.Add(xml.Element("Material").Element("PublicParams"));
+            }
 
             foreach (XElement el in xml.Descendants("SubMaterials").Descendants("Material"))
             {
@@ -569,7 +574,14 @@ namespace mtlConverter
                 //    Console.WriteLine(at);
                 //}
             }
-            xmlDoc.Add(subMaterials);
+            if (subMaterials.Element("Material") != null)
+            {
+                xmlDoc.Add(subMaterials); 
+            }
+            else
+            {
+                xmlDoc.Attribute("MtlFlags").Value = "524288";
+            }
             xmlDocument.Add(xmlDoc);
             //Console.Write(xmlDocument);
             //Console.Read();

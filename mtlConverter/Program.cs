@@ -60,7 +60,8 @@ namespace mtlConverter
                     }
                 }
             }
-            //Console.ReadLine();
+            Console.WriteLine("DONE");
+            Console.ReadLine();
         }
     }
 }
