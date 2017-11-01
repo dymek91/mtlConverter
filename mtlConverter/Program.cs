@@ -15,52 +15,55 @@ namespace mtlConverter
         
         static void Main(string[] args)
         {
-            foreach (string path in args)
+            if (Functions.ProcessLayersLibrary())
             {
-                if (path.Length > 0 && File.Exists(path))
+                foreach (string path in args)
                 {
-                    string extension = Path.GetExtension(path);
-                    switch (extension)
+                    if (path.Length > 0 && File.Exists(path))
                     {
-                        case ".mtl":
-                            Console.WriteLine("FILE {0}", path);
-                            Functions.decodeMtl(path);
-                            Functions.replaceSurfaceType(path);
-                            Functions.ConvertLayerBlend(path);
-
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                else if (path.Length > 0 && Directory.Exists(path))
-                {
-                    string[] filesnames = Functions.GetFiles(path);
-                    Console.WriteLine("Found {0} files", filesnames.Count());
-                    int count = 0;
-                    foreach (string path2 in filesnames)
-                    {
-                        count++;
-                        if (path2.Length > 0 && File.Exists(path2))
+                        string extension = Path.GetExtension(path);
+                        switch (extension)
                         {
-                            Console.WriteLine("[{0}/{1}]", count, filesnames.Count());
-                            string extension = Path.GetExtension(path2);
-                            switch (extension)
+                            case ".mtl":
+                                Console.WriteLine("FILE {0}", path);
+                                Functions.decodeMtl(path);
+                                Functions.replaceSurfaceType(path);
+                                Functions.ConvertLayerBlend(path);
+
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    else if (path.Length > 0 && Directory.Exists(path))
+                    {
+                        string[] filesnames = Functions.GetFiles(path);
+                        Console.WriteLine("Found {0} files", filesnames.Count());
+                        int count = 0;
+                        foreach (string path2 in filesnames)
+                        {
+                            count++;
+                            if (path2.Length > 0 && File.Exists(path2))
                             {
-                                case ".mtl":
-                                    Console.WriteLine("FILE {0}", path2);
-                                    Functions.decodeMtl(path2);
-                                    Functions.replaceSurfaceType(path2);
-                                    Functions.ConvertLayerBlend(path2);
-                                    break;
-                                default:
-                                    break;
+                                Console.WriteLine("[{0}/{1}]", count, filesnames.Count());
+                                string extension = Path.GetExtension(path2);
+                                switch (extension)
+                                {
+                                    case ".mtl":
+                                        Console.WriteLine("FILE {0}", path2);
+                                        Functions.decodeMtl(path2);
+                                        Functions.replaceSurfaceType(path2);
+                                        Functions.ConvertLayerBlend(path2);
+                                        break;
+                                    default:
+                                        break;
+                                }
                             }
                         }
                     }
                 }
+                Console.WriteLine("DONE");
             }
-            Console.WriteLine("DONE");
             Console.ReadLine();
         }
     }

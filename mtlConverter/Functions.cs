@@ -12,6 +12,59 @@ namespace mtlConverter
 {
     class Functions
     {
+        public static bool ProcessLayersLibrary()
+        {
+            bool processed = false;
+            if(!Directory.Exists("Materials"))
+            {
+                Console.WriteLine("Materials directory not found.");
+                Console.WriteLine("Copy Materials directory from DataXML.pak into folder where mtlConverter is located"); 
+                return false;
+            }
+            if(!checkIfDecoded("Materials/alpha.mtl"))
+            {
+                Console.WriteLine("no decoded");
+
+                string[] filesnames = Functions.GetFiles("Materials");
+                Console.WriteLine("Found {0} files", filesnames.Count());
+                int count = 0;
+                foreach (string path2 in filesnames)
+                {
+                    count++;
+                    if (path2.Length > 0 && File.Exists(path2))
+                    {
+                        Console.WriteLine("[{0}/{1}]", count, filesnames.Count());
+                        string extension = Path.GetExtension(path2);
+                        switch (extension)
+                        {
+                            case ".mtl":
+                                Console.WriteLine("FILE {0}", path2);
+                                Functions.decodeMtl(path2);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+                if (checkIfDecoded("Materials/alpha.mtl")) processed = true;
+            }
+            else
+            {
+                processed = true;
+            }
+
+            return processed;
+        }
+        static bool checkIfDecoded(string path)
+        {
+            bool decoded=false;
+            BinaryReader br = new BinaryReader(File.Open(
+                    path, FileMode.Open, FileAccess.Read));
+            string fileLabel = new string(br.ReadChars(6));
+            if (fileLabel != "CryXml") decoded = true;
+
+            return decoded;
+        }
         public static bool copy(string oldPath, string newPath)
         {
             FileStream input = null;
@@ -590,7 +643,7 @@ namespace mtlConverter
 
         private static string GetLayerDiffuseMap(string path)
         {
-            XDocument xml = XDocument.Load("D:/Programy/Crytek/CRYENGINE Launcher/Crytek/gamesdk_5.3/GameSDK/Assets/" + path);
+            XDocument xml = XDocument.Load( path);
             foreach (XElement el in xml.Descendants("Texture"))
             {
                 foreach (XAttribute at in el.Attributes())
@@ -602,7 +655,7 @@ namespace mtlConverter
         }
         private static string GetLayerBumpmap(string path)
         {
-            XDocument xml = XDocument.Load("D:/Programy/Crytek/CRYENGINE Launcher/Crytek/gamesdk_5.3/GameSDK/Assets/" + path);
+            XDocument xml = XDocument.Load(path);
             foreach (XElement el in xml.Descendants("Texture"))
             {
                 foreach (XAttribute at in el.Attributes())
@@ -614,7 +667,7 @@ namespace mtlConverter
         }
         private static string GetLayerDiff(string path)
         {
-            XDocument xml = XDocument.Load("D:/Programy/Crytek/CRYENGINE Launcher/Crytek/gamesdk_5.3/GameSDK/Assets/" + path);
+            XDocument xml = XDocument.Load( path);
             IEnumerable<XAttribute> rootAttributes = xml.Root.Attributes();
             foreach (XAttribute at in rootAttributes)
             {
@@ -625,7 +678,7 @@ namespace mtlConverter
         }
         private static string GetLayerSpec(string path)
         {
-            XDocument xml = XDocument.Load("D:/Programy/Crytek/CRYENGINE Launcher/Crytek/gamesdk_5.3/GameSDK/Assets/" + path);
+            XDocument xml = XDocument.Load( path);
             IEnumerable<XAttribute> rootAttributes = xml.Root.Attributes();
             foreach (XAttribute at in rootAttributes)
             {
@@ -636,7 +689,7 @@ namespace mtlConverter
         }
         private static string GetLayerFalloff(string path)
         {
-            XDocument xml = XDocument.Load("D:/Programy/Crytek/CRYENGINE Launcher/Crytek/gamesdk_5.3/GameSDK/Assets/" + path);
+            XDocument xml = XDocument.Load( path);
             IEnumerable<XAttribute> rootAttributes = xml.Root.Attributes();
             foreach (XAttribute at in xml.Root.Descendants("PublicParams").Attributes())
             {
@@ -647,7 +700,7 @@ namespace mtlConverter
         }
         private static string GetLayerSmooth(string path)
         {
-            XDocument xml = XDocument.Load("D:/Programy/Crytek/CRYENGINE Launcher/Crytek/gamesdk_5.3/GameSDK/Assets/" + path);
+            XDocument xml = XDocument.Load( path);
             IEnumerable<XAttribute> rootAttributes = xml.Root.Attributes();
             foreach (XAttribute at in rootAttributes)
             {
