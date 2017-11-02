@@ -5,14 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Diagnostics;
+using System.Diagnostics; 
 
 
 namespace mtlConverter
 {
     class Program
     {
-        
         static void Main(string[] args)
         {
             if (Functions.ProcessLayersLibrary())

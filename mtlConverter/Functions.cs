@@ -12,20 +12,21 @@ namespace mtlConverter
 {
     class Functions
     {
+        static string currentDir = AppDomain.CurrentDomain.BaseDirectory;
         public static bool ProcessLayersLibrary()
         {
             bool processed = false;
-            if(!Directory.Exists("Materials"))
+            if(!Directory.Exists(currentDir+"Materials"))
             {
                 Console.WriteLine("Materials directory not found.");
                 Console.WriteLine("Copy Materials directory from DataXML.pak into folder where mtlConverter is located"); 
                 return false;
             }
-            if(!checkIfDecoded("Materials/alpha.mtl"))
+            if(!checkIfDecoded(currentDir + "Materials/alpha.mtl"))
             {
                 Console.WriteLine("no decoded");
 
-                string[] filesnames = Functions.GetFiles("Materials");
+                string[] filesnames = Functions.GetFiles(currentDir + "Materials");
                 Console.WriteLine("Found {0} files", filesnames.Count());
                 int count = 0;
                 foreach (string path2 in filesnames)
@@ -46,7 +47,7 @@ namespace mtlConverter
                         }
                     }
                 }
-                if (checkIfDecoded("Materials/alpha.mtl")) processed = true;
+                if (checkIfDecoded(currentDir + "Materials/alpha.mtl")) processed = true;
             }
             else
             {
@@ -62,6 +63,7 @@ namespace mtlConverter
                     path, FileMode.Open, FileAccess.Read));
             string fileLabel = new string(br.ReadChars(6));
             if (fileLabel != "CryXml") decoded = true;
+            br.Close();
 
             return decoded;
         }
@@ -643,7 +645,7 @@ namespace mtlConverter
 
         private static string GetLayerDiffuseMap(string path)
         {
-            XDocument xml = XDocument.Load( path);
+            XDocument xml = XDocument.Load(currentDir + path);
             foreach (XElement el in xml.Descendants("Texture"))
             {
                 foreach (XAttribute at in el.Attributes())
@@ -655,7 +657,7 @@ namespace mtlConverter
         }
         private static string GetLayerBumpmap(string path)
         {
-            XDocument xml = XDocument.Load(path);
+            XDocument xml = XDocument.Load(currentDir + path);
             foreach (XElement el in xml.Descendants("Texture"))
             {
                 foreach (XAttribute at in el.Attributes())
@@ -667,7 +669,7 @@ namespace mtlConverter
         }
         private static string GetLayerDiff(string path)
         {
-            XDocument xml = XDocument.Load( path);
+            XDocument xml = XDocument.Load(currentDir + path);
             IEnumerable<XAttribute> rootAttributes = xml.Root.Attributes();
             foreach (XAttribute at in rootAttributes)
             {
@@ -678,7 +680,7 @@ namespace mtlConverter
         }
         private static string GetLayerSpec(string path)
         {
-            XDocument xml = XDocument.Load( path);
+            XDocument xml = XDocument.Load(currentDir + path);
             IEnumerable<XAttribute> rootAttributes = xml.Root.Attributes();
             foreach (XAttribute at in rootAttributes)
             {
@@ -689,7 +691,7 @@ namespace mtlConverter
         }
         private static string GetLayerFalloff(string path)
         {
-            XDocument xml = XDocument.Load( path);
+            XDocument xml = XDocument.Load(currentDir + path);
             IEnumerable<XAttribute> rootAttributes = xml.Root.Attributes();
             foreach (XAttribute at in xml.Root.Descendants("PublicParams").Attributes())
             {
@@ -700,7 +702,7 @@ namespace mtlConverter
         }
         private static string GetLayerSmooth(string path)
         {
-            XDocument xml = XDocument.Load( path);
+            XDocument xml = XDocument.Load(currentDir + path);
             IEnumerable<XAttribute> rootAttributes = xml.Root.Attributes();
             foreach (XAttribute at in rootAttributes)
             {
