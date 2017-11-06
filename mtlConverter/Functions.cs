@@ -329,9 +329,15 @@ namespace mtlConverter
                 rgx = new Regex(pattern);
                 result = rgx.Replace(input, replacement);
 
+                //input = result;
+                //pattern = "Shader=\"Illum\"";
+                //replacement = "Shader=\"IllumCIG\"";
+                //rgx = new Regex(pattern);
+                //result = rgx.Replace(input, replacement);
+
                 input = result;
-                pattern = "Shader=\"Illum\"";
-                replacement = "Shader=\"IllumCIG\"";
+                pattern = "Shader=\"HumanSkin_V2\"";
+                replacement = "Shader=\"HumanSkin\"";
                 rgx = new Regex(pattern);
                 result = rgx.Replace(input, replacement);
 
@@ -438,13 +444,42 @@ namespace mtlConverter
 
                 el.Attribute("SurfaceType").Value = "mat_metal";
                 if (el.Attribute("Shader").Value == "Illum")//IllumCIG
-                {
-                    el.Attribute("Shader").Value = "IllumCIG";
+                { 
+                    el.Attribute("Shader").Value = "Illum";
+                    if (el.Attribute("GenMask")!=null)
+                    {
+                        el.Attribute("GenMask").Value = generateGenMask(el.Attribute("StringGenMask").Value);
+                    }
+                    else
+                    {
+                        el.Add(new XAttribute("GenMask", generateGenMask(el.Attribute("StringGenMask").Value)));
+                    } 
+                    if (containBlendLayer(el, el.Attribute("StringGenMask").Value))
+                    {
+                        foreach(XElement el2 in el.Descendants("Texture"))
+                        {
+                            bool modified = false;
+                            if(el2.Attribute("Map").Value == "Decal")
+                            {
+                                el2.Attribute("Map").Value = "Custom";
+                                modified = true;
+                            }
+                            if (el2.Attribute("Map").Value == "Custom" && !modified)
+                            {
+                                el2.Attribute("Map").Value = "[1] Custom";
+                            }
+                        }
+                    }
                 }
 
                 //Console.WriteLine("/////////////////////////////");
                 //Console.WriteLine(el.Attribute("Shader").Value);
-                if (el.Attribute("Shader").Value == "LayerBlend")
+                string genMask = "";
+                if (el.Attribute("GenMask") != null)
+                {
+                    genMask = el.Attribute("GenMask").Value;
+                }
+                if (el.Attribute("Shader").Value == "LayerBlend" && containBlendLayer(el, el.Attribute("StringGenMask").Value))
                 {
                     XElement material = new XElement("Material");
                     foreach (XAttribute at in el.Attributes()) material.Add(at);
@@ -475,18 +510,40 @@ namespace mtlConverter
                     foreach (XElement elt in el.Descendants("Texture"))
                     {
                         XElement texture = new XElement("Texture");
+                        bool ifAdd = false;
                         foreach (XAttribute at in elt.Attributes())
-                        {
-                            if ((at.Name == "Map") && (at.Value == "[1] Custom")) texture.Add(new XAttribute("Map", "Detail"));
-                            else texture.Add(at);//%BLENDLAYER%DETAIL_MAPPING%HIGHRES_LAYERS%NORMAL_MAP
-                            if ((at.Name == "Map") && (at.Value == "Opacity")) { editGenMask = editGenMask + 402; editStringGenMask = editStringGenMask + "%BLENDLAYER%NORMAL_MAP"; }//material.Attribute("GenMask").Value = "1000402";
-                            if ((at.Name == "Map") && (at.Value == "Custom")) { editGenMask = editGenMask + 4000000; editStringGenMask = editStringGenMask + "%DETAIL_MAPPING"; }// material.Attribute("GenMask").Value = "5000402";
+                        { 
+                            if ((at.Name == "Map") && (at.Value == "[1] Custom"))
+                            {
+                                at.Value = "Diffuse"; 
+                                editStringGenMask = editStringGenMask + "%DETAIL_MAPPING";
+                                ifAdd = true;
+                            }
+                            else
+                            {
+                               // texture.Add(at);//%BLENDLAYER%DETAIL_MAPPING%HIGHRES_LAYERS%NORMAL_MAP
+                            }
+                            if ((at.Name == "Map") && (at.Value == "Opacity"))
+                            {
+                                at.Value = "Emittance";
+                                editGenMask = editGenMask + 402;
+                                editStringGenMask = editStringGenMask + "%BLENDLAYER%NORMAL_MAP";//material.Attribute("GenMask").Value = "1000402";
+                                ifAdd = true;
+                            }
+                            if ((at.Name == "Map") && (at.Value == "Custom"))
+                            {
+                                at.Value = "Bumpmap";
+                                editGenMask = editGenMask + 4000000;
+                                // material.Attribute("GenMask").Value = "5000402";
+                                ifAdd = true;
+                            }
+                            texture.Add(at);
                         }
-                        textures.Add(texture);
+                        if(ifAdd)textures.Add(texture);
                     }
                     material.Attribute("GenMask").Value = editGenMask.ToString();
                     material.Attribute("StringGenMask").Value = editStringGenMask;
-                    publicparams.Add(new XAttribute("WearDirtBlendFalloff", "1"));
+                    publicparams.Add(new XAttribute("WearDirtBlendFalloff", "0.4"));
                     foreach (XElement elt in el.Descendants("MatRef"))
                     {
                         foreach (XAttribute at in elt.Attributes())
@@ -494,13 +551,13 @@ namespace mtlConverter
                             if ((at.Name == "Slot") && (at.Value == "0"))
                             {
                                 XElement texture = new XElement("Texture");
-                                texture.Add(new XAttribute("Map", "Diffuse"));
+                                texture.Add(new XAttribute("Map", "Specular"));
                                 string layerPath = at.NextAttribute.Value;
                                 texture.Add(new XAttribute("File", GetLayerDiffuseMap(layerPath)));
                                 textures.Add(texture);
 
                                 texture = new XElement("Texture");
-                                XAttribute bumpAt = new XAttribute("Map", "Bumpmap");
+                                XAttribute bumpAt = new XAttribute("Map", "Detail");
                                 string bumpmapPath = GetLayerBumpmap(layerPath);
                                 if (bumpmapPath != "null")
                                 {
@@ -515,13 +572,13 @@ namespace mtlConverter
                             if ((at.Name == "Slot") && (at.Value == "1"))
                             {
                                 XElement texture = new XElement("Texture");
-                                texture.Add(new XAttribute("Map", "SubSurface"));
+                                texture.Add(new XAttribute("Map", "Heightmap"));
                                 string layerPath = at.NextAttribute.Value;
                                 texture.Add(new XAttribute("File", GetLayerDiffuseMap(layerPath)));
                                 textures.Add(texture);
 
                                 texture = new XElement("Texture");
-                                XAttribute bumpAt = new XAttribute("Map", "Specular");
+                                XAttribute bumpAt = new XAttribute("Map", "Decal");
                                 string bumpmapPath = GetLayerBumpmap(layerPath);
                                 if (bumpmapPath != "null")
                                 {
@@ -536,13 +593,13 @@ namespace mtlConverter
                             if ((at.Name == "Slot") && (at.Value == "2"))
                             {
                                 XElement texture = new XElement("Texture");
-                                texture.Add(new XAttribute("Map", "[1] Custom"));
+                                texture.Add(new XAttribute("Map", "SubSurface"));
                                 string layerPath = at.NextAttribute.Value;
                                 texture.Add(new XAttribute("File", GetLayerDiffuseMap(layerPath)));
                                 textures.Add(texture);
 
                                 texture = new XElement("Texture");
-                                XAttribute bumpAt = new XAttribute("Map", "Heightmap");
+                                XAttribute bumpAt = new XAttribute("Map", "Custom");
                                 string bumpmapPath = GetLayerBumpmap(layerPath);
                                 if (bumpmapPath != "null")
                                 {
@@ -557,13 +614,13 @@ namespace mtlConverter
                             if ((at.Name == "Slot") && (at.Value == "3"))
                             {
                                 XElement texture = new XElement("Texture");
-                                texture.Add(new XAttribute("Map", "Emittance"));
+                                texture.Add(new XAttribute("Map", "[1] Custom"));
                                 string layerPath = at.NextAttribute.Value;
                                 texture.Add(new XAttribute("File", GetLayerDiffuseMap(layerPath)));
                                 textures.Add(texture);
 
                                 texture = new XElement("Texture");
-                                XAttribute bumpAt = new XAttribute("Map", "Decal");
+                                XAttribute bumpAt = new XAttribute("Map", "Opacity");
                                 string bumpmapPath = GetLayerBumpmap(layerPath);
                                 if (bumpmapPath != "null")
                                 {
@@ -581,7 +638,7 @@ namespace mtlConverter
                                 string layerPath = at.NextAttribute.Value;
                                 publicparams.Add(new XAttribute("WearDiff1", GetLayerDiff(layerPath)));
                                 publicparams.Add(new XAttribute("WearSpec1", GetLayerSpec(layerPath)));
-                                publicparams.Attribute("WearDirtBlendFalloff").Value = GetLayerFalloff(layerPath);
+                                //publicparams.Attribute("WearDirtBlendFalloff").Value = GetLayerFalloff(layerPath);
                             }
                             if ((at.Name == "Slot") && (at.Value == "5"))
                             {
@@ -607,16 +664,133 @@ namespace mtlConverter
                         }
 
                     }
-                    publicparams.Add(new XAttribute("WearScale", "3"));
-                    publicparams.Add(new XAttribute("TearScale", "3"));
+                    publicparams.Add(new XAttribute("WearScale", "7"));
+                    publicparams.Add(new XAttribute("TearScale", "7"));
 
                     material.Add(textures);
                     material.Add(publicparams);
                     subMaterials.Add(material);
                 }
+                
                 else
                 {
-                    subMaterials.Add(el);
+                    if(el.Attribute("Shader").Value == "LayerBlend" && !containBlendLayer(el,el.Attribute("StringGenMask").Value))
+                    {
+                        XElement material = new XElement("Material");
+                        foreach (XAttribute at in el.Attributes()) material.Add(at);
+                        try
+                        {
+                            //material.Add(new XAttribute("GenMask", "5000402"));
+                        }
+                        catch (Exception ex)
+                        {
+                            //material.Attribute("GenMask").Value = "5000402";
+                        }
+                        //material.Attribute("StringGenMask").Value = "%BLENDLAYER%DETAIL_MAPPING%HIGHRES_LAYERS%NORMAL_MAP";
+                        material.Attribute("StringGenMask").Value = "%HIGHRES_LAYERS";
+                        try
+                        {
+                            material.Attribute("GenMask").Value = "1000000";
+                        }
+                        catch (Exception ex)
+                        {
+                            material.Add(new XAttribute("GenMask", "1000000"));
+                        }
+                        material.Attribute("MtlFlags").Value = "524416";
+                        XElement publicparams = new XElement("PublicParams");
+                        foreach (XAttribute at in el.Descendants("PublicParams").Attributes()) publicparams.Add(at);
+                        XElement textures = new XElement("Textures");
+                        int editGenMask = 1000000;
+                        string editStringGenMask = "%HIGHRES_LAYERS";
+                        foreach (XElement elt in el.Descendants("Texture"))
+                        {
+                            XElement texture = new XElement("Texture");
+                            bool ifAdd = false;
+                            foreach (XAttribute at in elt.Attributes())
+                            {
+                                if ((at.Name == "Map") && (at.Value == "[1] Custom"))
+                                {
+                                    at.Value = "Detail";
+                                    editStringGenMask = editStringGenMask + "%DETAIL_MAPPING";
+                                    ifAdd = true;
+                                }
+                                else
+                                {
+                                    // texture.Add(at);//%BLENDLAYER%DETAIL_MAPPING%HIGHRES_LAYERS%NORMAL_MAP
+                                } 
+                                texture.Add(at);
+                            }
+                            if (ifAdd) textures.Add(texture);
+                        }
+                        material.Attribute("GenMask").Value = editGenMask.ToString();
+                        material.Attribute("StringGenMask").Value = editStringGenMask;
+                        publicparams.Add(new XAttribute("WearDirtBlendFalloff", "0.4"));
+                        foreach (XElement elt in el.Descendants("MatRef"))
+                        {
+                            foreach (XAttribute at in elt.Attributes())
+                            {
+                                if ((at.Name == "Slot") && (at.Value == "0"))
+                                {
+                                    XElement texture = new XElement("Texture");
+                                    texture.Add(new XAttribute("Map", "Diffuse"));
+                                    string layerPath = at.NextAttribute.Value;
+                                    texture.Add(new XAttribute("File", GetLayerDiffuseMap(layerPath)));
+                                    textures.Add(texture);
+
+                                    texture = new XElement("Texture");
+                                    XAttribute bumpAt = new XAttribute("Map", "Bumpmap");
+                                    string bumpmapPath = GetLayerBumpmap(layerPath);
+                                    if (bumpmapPath != "null")
+                                    {
+                                        texture.Add(bumpAt);
+                                        texture.Add(new XAttribute("File", bumpmapPath));
+                                    }
+                                    textures.Add(texture);
+                                    publicparams.Add(new XAttribute("Diff1", GetLayerDiff(layerPath)));
+                                    publicparams.Add(new XAttribute("Spec1", GetLayerSpec(layerPath)));
+                                    publicparams.Add(new XAttribute("Smooth1", GetLayerSmooth(layerPath)));
+                                }
+                               
+                                //wear layers
+                                if ((at.Name == "Slot") && (at.Value == "4"))
+                                {
+                                    XElement texture = new XElement("Texture");
+                                    texture.Add(new XAttribute("Map", "Custom"));
+                                    string layerPath = at.NextAttribute.Value;
+                                    texture.Add(new XAttribute("File", GetLayerDiffuseMap(layerPath)));
+                                    textures.Add(texture);
+
+                                    texture = new XElement("Texture");
+                                    XAttribute bumpAt = new XAttribute("Map", "[1] Custom");
+                                    string bumpmapPath = GetLayerBumpmap(layerPath);
+                                    if (bumpmapPath != "null")
+                                    {
+                                        texture.Add(bumpAt);
+                                        texture.Add(new XAttribute("File", bumpmapPath));
+                                    }
+                                    textures.Add(texture);
+
+                                    publicparams.Add(new XAttribute("WearDiff1", GetLayerDiff(layerPath)));
+                                    publicparams.Add(new XAttribute("WearSpec1", GetLayerSpec(layerPath)));
+                                    //publicparams.Attribute("WearDirtBlendFalloff").Value = GetLayerFalloff(layerPath);
+                                }
+                                 
+                            }
+
+                        }
+                        publicparams.Add(new XAttribute("WearBlendFalloff", "2"));
+                        publicparams.Add(new XAttribute("DirtBlendFalloff", "2"));
+                        publicparams.Add(new XAttribute("WearScale", "7"));
+                        publicparams.Add(new XAttribute("TearScale", "7"));
+
+                        material.Add(textures);
+                        material.Add(publicparams);
+                        subMaterials.Add(material);
+                    }
+                    else
+                    {
+                        subMaterials.Add(el);
+                    }   
                 }
 
                 //Console.WriteLine("/////////////////////////////");
@@ -712,5 +886,122 @@ namespace mtlConverter
 
             return "null";
         }
+        private static string generateGenMask(string stringMask)
+        {
+            string genMask="";
+            string[] elements;
+            uint genMaskInt = 0;//0xC0000;
+            
+            string[] stringSeparators = new string[] { "%" };
+            elements = stringMask.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
+            foreach(string el in elements)
+            {
+                if(el == "NORMAL_MAP")
+                {
+                    genMaskInt += 0x1;
+                }
+                if (el == "SPECULAR_MAP")
+                {
+                    genMaskInt += 0x10;
+                }
+                if (el == "DETAIL_MAPPING")
+                {
+                    genMaskInt += 0x4000;
+                }
+                if (el == "OFFSET_BUMP_MAPPING")
+                {
+                    genMaskInt += 0x20000;
+                }
+                if (el == "VERTCOLORS")
+                {
+                    genMaskInt += 0x400000;
+                }
+                if (el == "DECAL")
+                {
+                    genMaskInt += 0x2000000;
+                }
+                if (el == "PARALLAX_OCCLUSION_MAPPING")
+                {
+                    genMaskInt += 0x8000000;
+                }
+                if (el == "DISPLACEMENT_MAPPING")
+                {
+                    genMaskInt += 0x10000000;
+                }
+                if (el == "PHONG_TESSELLATION")
+                {
+                    genMaskInt += 0x20000000;
+                }
+                if (el == "PN_TESSELLATION")
+                {
+                    genMaskInt += 0x40000000;
+                }
+                if (el == "DIRTLAYER")
+                {
+                    genMaskInt += 0x200000;
+                }
+                if (el == "BLENDLAYER")
+                {
+                    genMaskInt += 0x100;
+                }
+                if (el == "ALPHAMASK_DETAILMAP")
+                {
+                    genMaskInt += 0x800000;
+                }
+                if (el == "SILHOUETTE_PARALLAX_OCCLUSION_MAPPING")
+                {
+                    genMaskInt += 0x10000;
+                }
+                if (el == "ALLOW_SILHOUETTE_POM")
+                {
+                    genMaskInt += 0x40000;
+                }
+                if (el == "SUBSURFACE_SCATTERING")
+                {
+                    genMaskInt += 0x80000;
+                }
+
+            }
+           // Console.WriteLine(String.Format("{0:X}", genMaskInt));
+            genMask = String.Format("{0:X}", genMaskInt);
+            return genMask;
+        }
+        private static string ByteArrayToString(byte[] ba)
+        {
+            string hex =  BitConverter.ToString(ba);
+            return  hex.Replace("-", "");
+        }
+        private static string Reverse(string s)
+        {
+            char[] charArray = s.ToCharArray();
+            Array.Reverse(charArray);
+            return new string(charArray);
+        }
+        private static bool containBlendLayer(XElement element, string stringMask)
+        {
+            
+            bool ifBlend = false;
+            string[] elements;
+            string[] stringSeparators = new string[] { "%" };
+            elements = stringMask.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string el in elements)
+            {
+                if (el == "BLENDLAYER" || el == "BLEND_MAP")
+                {
+                    ifBlend = true;
+                }
+            }
+            if(!ifBlend)
+            { 
+                foreach (XElement el in element.Descendants("Texture"))
+                {
+                    if (el.Attribute("File").Value.Contains("_blend"))
+                    {
+                        ifBlend = true;
+                    } 
+                }
+            }
+            return ifBlend;
+        } 
     }
 }
