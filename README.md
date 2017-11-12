@@ -1,5 +1,5 @@
 # mtlConverter
-Convert Star Citizen .mtl files to get advantage of custom shaders in CryEngine and save manual work.
+Convert Star Citizen .mtl files to use in CryEngine. Includes LayerBlend shader.
 
 **Requirements:**
 
@@ -16,5 +16,5 @@ WARNING It will overwrite all existing .mtl files!
 
 **Notes:**
 
-Custom shaders ( LayerBlend and IllumCIG ) are included in release package. Extract ShaderPack.zip here: 
-Crytek\CRYENGINE Launcher\Crytek\CRYENGINE_5.3\engine
+Custom shaders ( LayerBlend ) are included in release package. Extract ShadersPack_CE-54.zip here: 
+Crytek\CRYENGINE Launcher\Crytek\CRYENGINE_5.4\engine
