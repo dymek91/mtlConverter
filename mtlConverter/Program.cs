@@ -30,6 +30,12 @@ namespace mtlConverter
                                 Functions.ConvertLayerBlend(path);
 
                                 break;
+                            case ".chrparams":
+                            case ".cdf":
+                            case ".xml":
+                                Console.WriteLine("FILE {0}", path);
+                                Functions.decodeMtl(path);
+                                break;
                             default:
                                 break;
                         }
@@ -53,6 +59,12 @@ namespace mtlConverter
                                         Functions.decodeMtl(path2);
                                         Functions.replaceSurfaceType(path2);
                                         Functions.ConvertLayerBlend(path2);
+                                        break;
+                                    case ".chrparams":
+                                    case ".cdf":
+                                    case ".xml":
+                                        Console.WriteLine("FILE {0}", path2);
+                                        Functions.decodeMtl(path2);
                                         break;
                                     default:
                                         break;

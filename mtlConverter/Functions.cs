@@ -103,36 +103,53 @@ namespace mtlConverter
             String[] filenames = Directory.GetFiles(path, "*", SearchOption.AllDirectories);
             return filenames;
         }
+        public static bool checkIfCryXml(string path)
+        {
+            bool isCryXml = false;
+            using (BinaryReader br = new BinaryReader(File.Open(path, FileMode.Open, FileAccess.Read)))
+            {
+               string fileSignature = new string( br.ReadChars(6)); 
+                if(fileSignature == "CryXml")
+                {
+                    isCryXml = true;
+                }
+                br.Close();
+            }
+            return isCryXml;
+        }
         public static void decodeMtl(string path)
         {
             string dir = Directory.GetCurrentDirectory();
 
-            try
+            if (checkIfCryXml(path))
             {
-                ProcessStartInfo psi = new ProcessStartInfo("HoloXPLOR.DataForge.exe", "\"" + path + "\"")
+                try
                 {
-                    CreateNoWindow = true,
-                    WindowStyle = ProcessWindowStyle.Hidden,
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true
-                };
-                var process = Process.Start(psi);
-                process.WaitForExit();
-                string pathDir = Path.GetDirectoryName(path) + "\\";
-                string pathFile = Path.GetFileNameWithoutExtension(path);
-                string pathExt = Path.GetExtension(path);
-                if (File.Exists(pathDir + pathFile + ".raw")) File.Delete(path);
-                copy(pathDir + pathFile + ".raw", pathDir + pathFile + pathExt);
-                File.Delete(pathDir + pathFile + ".raw");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("----------------------------------");
-                Console.WriteLine("HoloXPLOR.DataForge.exe not found");
-                Console.WriteLine("Get it here: https://github.com/dolkensp/HoloXPLOR/releases");
-                Console.WriteLine("and put in same directory as mtlConverter.exe");
-                Console.Read();
-                throw;
+                    ProcessStartInfo psi = new ProcessStartInfo("HoloXPLOR.DataForge.exe", "\"" + path + "\"")
+                    {
+                        CreateNoWindow = true,
+                        WindowStyle = ProcessWindowStyle.Hidden,
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true
+                    };
+                    var process = Process.Start(psi);
+                    process.WaitForExit();
+                    string pathDir = Path.GetDirectoryName(path) + "\\";
+                    string pathFile = Path.GetFileNameWithoutExtension(path);
+                    string pathExt = Path.GetExtension(path);
+                    if (File.Exists(pathDir + pathFile + ".raw")) File.Delete(path);
+                    copy(pathDir + pathFile + ".raw", pathDir + pathFile + pathExt);
+                    File.Delete(pathDir + pathFile + ".raw");
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("----------------------------------");
+                    Console.WriteLine("HoloXPLOR.DataForge.exe not found");
+                    Console.WriteLine("Get it here: https://github.com/dolkensp/HoloXPLOR/releases");
+                    Console.WriteLine("and put in same directory as mtlConverter.exe");
+                    Console.Read();
+                    throw;
+                }
             }
 
 
