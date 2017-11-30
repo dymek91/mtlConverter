@@ -207,6 +207,24 @@ namespace mtlConverter
                 rgx = new Regex(pattern);
                 result = rgx.Replace(input, replacement);
 
+                input = result;
+                pattern = "Shader=\"Cloth\"";
+                replacement = "Shader=\"Illum\"";
+                rgx = new Regex(pattern);
+                result = rgx.Replace(input, replacement);
+
+                input = result;
+                pattern = ".tiff";
+                replacement = ".dds";
+                rgx = new Regex(pattern);
+                result = rgx.Replace(input, replacement);
+
+                input = result;
+                pattern = ".tif";
+                replacement = ".dds";
+                rgx = new Regex(pattern);
+                result = rgx.Replace(input, replacement);
+
                 ////////////////////////////////////
 
                 /*input = result;
@@ -486,6 +504,10 @@ namespace mtlConverter
                                 el2.Attribute("Map").Value = "[1] Custom";
                             }
                         }
+                    }
+                    if(IsPomDecal(el))
+                    {
+                        el.Attribute("Specular").Value = "0.04,0.04,0.04";
                     }
                 }
 
@@ -1019,6 +1041,16 @@ namespace mtlConverter
                 }
             }
             return ifBlend;
-        } 
+        }
+        private static bool IsPomDecal(XElement element)
+        {
+
+            bool isPomDecal = false;
+            if (element.Element("PublicParams").Attribute("PomDisplacement")!=null)
+            {
+                isPomDecal = true;
+            }
+            return isPomDecal;
+        }
     }
 }
