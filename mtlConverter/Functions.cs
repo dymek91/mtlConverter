@@ -358,11 +358,11 @@ namespace mtlConverter
                 rgx = new Regex(pattern);
                 result = rgx.Replace(input, replacement);
 
-                input = result;
-                pattern = "DecalDiffuseOpacity=\"(.*?)\"";
-                replacement = "DecalDiffuseOpacity=\"0\"";
-                rgx = new Regex(pattern);
-                result = rgx.Replace(input, replacement);
+                //input = result;
+                //pattern = "DecalDiffuseOpacity=\"(.*?)\"";
+                //replacement = "DecalDiffuseOpacity=\"0\"";
+                //rgx = new Regex(pattern);
+                //result = rgx.Replace(input, replacement);
 
                 //input = result;
                 //pattern = "Shader=\"Illum\"";
@@ -508,6 +508,7 @@ namespace mtlConverter
                     if(IsPomDecal(el))
                     {
                         el.Attribute("Specular").Value = "0.04,0.04,0.04";
+                        el.Element("PublicParams").Attribute("DecalDiffuseOpacity").Value = "0";
                     }
                 }
 
@@ -1046,7 +1047,7 @@ namespace mtlConverter
         {
 
             bool isPomDecal = false;
-            if (element.Element("PublicParams").Attribute("PomDisplacement")!=null)
+            if (element.Element("PublicParams").Attribute("PomDisplacement")!=null && element.Element("PublicParams").Attribute("DecalDiffuseOpacity") != null)
             {
                 isPomDecal = true;
             }
