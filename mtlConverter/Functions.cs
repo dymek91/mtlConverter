@@ -446,12 +446,12 @@ namespace mtlConverter
                         // Console.Read();
                     }
                 }
-            }
-            catch (Exception ex)
-            {
+           }
+           catch (Exception ex)
+           {
                 Console.WriteLine("Error converting {0}: {1}", path, ex.Message);
                 // Console.Read();
-            }
+           }
         }
         private static XDocument CreateXML(XDocument xml)
         {
@@ -488,20 +488,32 @@ namespace mtlConverter
                     else
                     {
                         el.Add(new XAttribute("GenMask", generateGenMask(el.Attribute("StringGenMask").Value)));
-                    } 
+                    }
                     if (containBlendLayer(el, el.Attribute("StringGenMask").Value))
                     {
-                        foreach(XElement el2 in el.Descendants("Texture"))
+                        foreach (XElement el2 in el.Descendants("Texture"))
                         {
                             bool modified = false;
-                            if(el2.Attribute("Map").Value == "Decal")
+                            if (el2.Attribute("Map").Value == "Decal")
                             {
                                 el2.Attribute("Map").Value = "Custom";
                                 modified = true;
                             }
+                            if (el2.Attribute("Map").Value == "[1] Custom")
+                            {
+                                el2.Attribute("Map").Value = "todelete";
+                            }
                             if (el2.Attribute("Map").Value == "Custom" && !modified)
                             {
                                 el2.Attribute("Map").Value = "[1] Custom";
+                            }
+                        }
+                        foreach (XElement el2 in el.Descendants("Texture"))
+                        {
+                            if (el2.Attribute("Map").Value == "todelete")
+                            {
+                                el2.Remove();
+                                break;
                             }
                         }
                     }
