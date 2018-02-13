@@ -478,6 +478,16 @@ namespace mtlConverter
                 IEnumerable<XElement> matElements = el.Elements();
 
                 el.Attribute("SurfaceType").Value = "mat_metal";
+
+                //fixing alpha parameter problem in some mats, when alphatest=1 then alphatest=0
+                if(el.Attribute("AlphaTest") != null)
+                {
+                    if(el.Attribute("AlphaTest").Value == "1")
+                    {
+                        el.Attribute("AlphaTest").Value = "0";
+                    }
+                }
+
                 if (el.Attribute("Shader").Value == "Illum")//IllumCIG
                 { 
                     el.Attribute("Shader").Value = "Illum";
