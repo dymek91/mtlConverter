@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("mtlConverter")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("mtlConverter - CryEngine 5.5 Modded")]
+[assembly: AssemblyDescription("Star Citizen Materials Converter for modded CryEngine 5.5")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("mtlConverter")]
-[assembly: AssemblyCopyright("Copyright ©  2017")]
+[assembly: AssemblyCompany("Dymek™")]
+[assembly: AssemblyProduct("mtlConverter_CE55_Modded")]
+[assembly: AssemblyCopyright("Copyright ©  2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

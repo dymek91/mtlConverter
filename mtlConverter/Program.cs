@@ -26,8 +26,8 @@ namespace mtlConverter
                             case ".mtl":
                                 Console.WriteLine("FILE {0}", path);
                                 Functions.decodeMtl(path);
-                                Functions.replaceSurfaceType(path);
-                                Functions.ConvertLayerBlend(path);
+                                MTLConvert_CE55_Modded.replaceSurfaceType(path);
+                                MTLConvert_CE55_Modded.ConvertLayerBlend(path);
 
                                 break;
                             case ".chrparams":
@@ -57,8 +57,8 @@ namespace mtlConverter
                                     case ".mtl":
                                         Console.WriteLine("FILE {0}", path2);
                                         Functions.decodeMtl(path2);
-                                        Functions.replaceSurfaceType(path2);
-                                        Functions.ConvertLayerBlend(path2);
+                                        MTLConvert_CE55_Modded.replaceSurfaceType(path2);
+                                        MTLConvert_CE55_Modded.ConvertLayerBlend(path2);
                                         break;
                                     case ".chrparams":
                                     case ".cdf":
