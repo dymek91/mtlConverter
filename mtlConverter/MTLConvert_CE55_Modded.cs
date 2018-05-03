@@ -351,14 +351,7 @@ namespace mtlConverter
                 if (el.Attribute("Shader").Value == "Illum")//IllumCIG
                 {
                     el.Attribute("Shader").Value = "Illum";
-                    if (el.Attribute("GenMask") != null)
-                    {
-                        el.Attribute("GenMask").Value = generateGenMask(el.Attribute("StringGenMask").Value);
-                    }
-                    else
-                    {
-                        el.Add(new XAttribute("GenMask", generateGenMask(el.Attribute("StringGenMask").Value)));
-                    }
+                    
                     if (containBlendLayer(el, el.Attribute("StringGenMask").Value))
                     {
                         foreach (XElement el2 in el.Descendants("Texture"))
@@ -377,6 +370,15 @@ namespace mtlConverter
                             {
                                 el2.Attribute("Map").Value = "[1] Custom";
                             }
+                            if (el2.Attribute("Map").Value == "BlendDetail")
+                            {
+                                el2.Attribute("Map").Value = "Layer1 Bumpmap";
+                            }
+                            if (el2.Attribute("Map").Value == "Smoothness")
+                            {
+                                el2.Attribute("Map").Value = "Detail";
+                                el.Attribute("StringGenMask").Value = el.Attribute("StringGenMask").Value + "%DETAIL_MAPPING";
+                            }
                         }
                         foreach (XElement el2 in el.Descendants("Texture"))
                         {
@@ -386,6 +388,14 @@ namespace mtlConverter
                                 break;
                             }
                         }
+                    }
+                    if (el.Attribute("GenMask") != null)
+                    {
+                        el.Attribute("GenMask").Value = generateGenMask(el.Attribute("StringGenMask").Value);
+                    }
+                    else
+                    {
+                        el.Add(new XAttribute("GenMask", generateGenMask(el.Attribute("StringGenMask").Value)));
                     }
                     if (IsPomDecal(el))
                     {
