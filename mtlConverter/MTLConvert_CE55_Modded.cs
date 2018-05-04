@@ -399,8 +399,8 @@ namespace mtlConverter
                     }
                     if (IsPomDecal(el))
                     {
-                        el.Attribute("Specular").Value = "0.04,0.04,0.04";
-                        el.Element("PublicParams").Attribute("DecalDiffuseOpacity").Value = "0";
+                        //el.Attribute("Specular").Value = "0.04,0.04,0.04";
+                        //el.Element("PublicParams").Attribute("DecalDiffuseOpacity").Value = "0";
                     }
                 }
 
