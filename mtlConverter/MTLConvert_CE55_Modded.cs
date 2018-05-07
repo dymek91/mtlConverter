@@ -352,7 +352,7 @@ namespace mtlConverter
                 {
                     el.Attribute("Shader").Value = "Illum";
                     
-                    if (containBlendLayer(el, el.Attribute("StringGenMask").Value))
+                    if (ContainBlendLayer(el, el.Attribute("StringGenMask").Value))
                     {
                         foreach (XElement el2 in el.Descendants("Texture"))
                         {
@@ -411,7 +411,7 @@ namespace mtlConverter
                 {
                     genMask = el.Attribute("GenMask").Value;
                 }
-                if (el.Attribute("Shader").Value == "LayerBlend" && containBlendLayer(el, el.Attribute("StringGenMask").Value))
+                if (el.Attribute("Shader").Value == "LayerBlend" && ContainBlendLayer(el, el.Attribute("StringGenMask").Value))
                 {
                     XElement material = new XElement("Material");
                     foreach (XAttribute at in el.Attributes()) material.Add(at);
@@ -485,8 +485,9 @@ namespace mtlConverter
                     publicparams.Add(new XAttribute("WearDirtBlendFalloff", "0.4"));
                     foreach (XElement elt in el.Descendants("MatRef"))
                     {
+                        if (!File.Exists(elt.Attribute("File").Value)) continue;
                         foreach (XAttribute at in elt.Attributes())
-                        {
+                        { 
                             if ((at.Name == "Slot") && (at.Value == "0"))
                             {
                                 XElement texture = new XElement("Texture");
@@ -669,7 +670,7 @@ namespace mtlConverter
 
                 else
                 {
-                    if (el.Attribute("Shader").Value == "LayerBlend" && !containBlendLayer(el, el.Attribute("StringGenMask").Value))
+                    if (el.Attribute("Shader").Value == "LayerBlend" && !ContainBlendLayer(el, el.Attribute("StringGenMask").Value))
                     {
                         XElement material = new XElement("Material");
                         foreach (XAttribute at in el.Attributes()) material.Add(at);
@@ -722,6 +723,7 @@ namespace mtlConverter
                         publicparams.Add(new XAttribute("WearDirtBlendFalloff", "0.4"));
                         foreach (XElement elt in el.Descendants("MatRef"))
                         {
+                            if (!File.Exists(elt.Attribute("File").Value)) continue;
                             foreach (XAttribute at in elt.Attributes())
                             {
                                 if ((at.Name == "Slot") && (at.Value == "0"))
@@ -814,24 +816,30 @@ namespace mtlConverter
 
         private static string GetLayerDiffuseMap(string path)
         {
-            XDocument xml = XDocument.Load(currentDir + path);
-            foreach (XElement el in xml.Descendants("Texture"))
+            if (File.Exists(path))
             {
-                foreach (XAttribute at in el.Attributes())
+                XDocument xml = XDocument.Load(currentDir + path);
+                foreach (XElement el in xml.Descendants("Texture"))
                 {
-                    if ((at.Name == "Map") && (at.Value == "Diffuse")) return at.NextAttribute.Value;
+                    foreach (XAttribute at in el.Attributes())
+                    {
+                        if ((at.Name == "Map") && (at.Value == "Diffuse")) return at.NextAttribute.Value;
+                    }
                 }
             }
             return "textures/colors/white.dds";
         }
         private static string GetLayerBumpmap(string path)
         {
-            XDocument xml = XDocument.Load(currentDir + path);
-            foreach (XElement el in xml.Descendants("Texture"))
+            if (File.Exists(path))
             {
-                foreach (XAttribute at in el.Attributes())
+                XDocument xml = XDocument.Load(currentDir + path);
+                foreach (XElement el in xml.Descendants("Texture"))
                 {
-                    if ((at.Name == "Map") && (at.Value == "Bumpmap")) return at.NextAttribute.Value;
+                    foreach (XAttribute at in el.Attributes())
+                    {
+                        if ((at.Name == "Map") && (at.Value == "Bumpmap")) return at.NextAttribute.Value;
+                    }
                 }
             }
             return "null";
@@ -972,7 +980,7 @@ namespace mtlConverter
             Array.Reverse(charArray);
             return new string(charArray);
         }
-        private static bool containBlendLayer(XElement element, string stringMask)
+        private static bool ContainBlendLayer(XElement element, string stringMask)
         {
 
             bool ifBlend = false;
@@ -991,6 +999,10 @@ namespace mtlConverter
                 foreach (XElement el in element.Descendants("Texture"))
                 {
                     if (el.Attribute("File").Value.Contains("_blend"))
+                    {
+                        ifBlend = true;
+                    }
+                    if (el.Attribute("File").Value.Contains("_id_map"))
                     {
                         ifBlend = true;
                     }
