@@ -587,8 +587,8 @@ namespace mtlConverter
                         }
 
                     }
-                    publicparams.Add(new XAttribute("WearScale", "7"));
-                    publicparams.Add(new XAttribute("TearScale", "7"));
+                   // publicparams.Add(new XAttribute("WearScale", "7"));
+                    //publicparams.Add(new XAttribute("TearScale", "7"));
 
                     material.Add(textures);
                     material.Add(publicparams);
@@ -701,10 +701,10 @@ namespace mtlConverter
                             }
 
                         }
-                        publicparams.Add(new XAttribute("WearBlendFalloff", "2"));
-                        publicparams.Add(new XAttribute("DirtBlendFalloff", "2"));
-                        publicparams.Add(new XAttribute("WearScale", "7"));
-                        publicparams.Add(new XAttribute("TearScale", "7"));
+                        //publicparams.Add(new XAttribute("WearBlendFalloff", "2"));
+                       // publicparams.Add(new XAttribute("DirtBlendFalloff", "2"));
+                       // publicparams.Add(new XAttribute("WearScale", "7"));
+                        //publicparams.Add(new XAttribute("TearScale", "7"));
 
                         material.Add(textures);
                         material.Add(publicparams);
