@@ -483,7 +483,7 @@ namespace mtlConverter
                     }
                     material.Attribute("GenMask").Value = editGenMask.ToString();
                     material.Attribute("StringGenMask").Value = editStringGenMask;
-                    publicparams.Add(new XAttribute("WearDirtBlendFalloff", "0.4"));
+                   // publicparams.Add(new XAttribute("WearDirtBlendFalloff", "0.4"));
                     foreach (XElement elt in el.Descendants("MatRef"))
                     {
                         if (!File.Exists(elt.Attribute("File").Value)) continue;
@@ -661,8 +661,8 @@ namespace mtlConverter
                         }
 
                     }
-                    publicparams.Add(new XAttribute("WearScale", "7"));
-                    publicparams.Add(new XAttribute("TearScale", "7"));
+                   // publicparams.Add(new XAttribute("WearScale", "7"));
+                    //publicparams.Add(new XAttribute("TearScale", "7"));
 
                     material.Add(textures);
                     material.Add(publicparams);
