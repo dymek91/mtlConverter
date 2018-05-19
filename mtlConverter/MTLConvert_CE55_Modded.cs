@@ -667,11 +667,13 @@ namespace mtlConverter
                     material.Add(textures);
                     material.Add(publicparams);
                     material = ExtractMtlsFlagsToStringGenMask(material);
+                    material = RemoveTexType0(material);
                     subMaterials.Add(material);
                 }
                 else
                 {
                     XElement el2 = ExtractMtlsFlagsToStringGenMask(el);
+                    el2 = RemoveTexType0(el2);
                     subMaterials.Add(el2);
                 }
                 //else
@@ -1067,6 +1069,20 @@ namespace mtlConverter
                 }
             }
 
+            return el;
+        }
+        private static XElement RemoveTexType0(XElement el)
+        {
+            foreach (XElement elt in el.Descendants("Texture"))
+            {
+                if(elt.Attribute("TexType")!=null)
+                {
+                    if(elt.Attribute("TexType").Value=="0")
+                    {
+                        elt.Attribute("TexType").Remove();
+                    }
+                }
+            }
             return el;
         }
     }
